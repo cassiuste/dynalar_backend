@@ -1,7 +1,14 @@
 package com.dynalar.dynalar.model.patient;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -9,13 +16,12 @@ import jakarta.persistence.Table;
 @Table(name = "patient")
 public class Patient {
 
-	@OneToOne
-    @JoinColumn(name = "medical_record_id", unique = true)
-    private MedicalRecord medicalRecord;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
     private String name;
     private String lastName;
-    private String password;
     private String email;
     private String dni;
     private String socialSecurityNumber;
@@ -23,108 +29,145 @@ public class Patient {
     private Boolean treatmentConsent;
     private Boolean anesthesiaConsent;
     private String billing;
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "medical_record_id", unique = true)
+    private MedicalRecord medicalRecord;
 
-    @OneToOne(mappedBy = "patient")
-    private Document documents;
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Document> documents;
     
     public Patient() {
 	}
 
-	public MedicalRecord getMedicalRecord() {
-		return medicalRecord;
+    
+    public Patient(MedicalRecord medicalRecord, String name, String lastName, String email, String dni)
+    {
+    	this.medicalRecord = medicalRecord;
+		this.name = name;
+		this.lastName = lastName;
+		this.email = email;
+		this.dni = dni;
+    }
+
+
+	public Long getId() {
+		return id;
 	}
 
-	public void setMedicalRecord(MedicalRecord medicalRecord) {
-		this.medicalRecord = medicalRecord;
+
+	public void setId(Long id) {
+		this.id = id;
 	}
+
 
 	public String getName() {
 		return name;
 	}
 
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 
 	public String getLastName() {
 		return lastName;
 	}
 
+
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
 
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
 
 	public String getEmail() {
 		return email;
 	}
 
+
 	public void setEmail(String email) {
 		this.email = email;
 	}
+
 
 	public String getDni() {
 		return dni;
 	}
 
+
 	public void setDni(String dni) {
 		this.dni = dni;
 	}
+
 
 	public String getSocialSecurityNumber() {
 		return socialSecurityNumber;
 	}
 
+
 	public void setSocialSecurityNumber(String socialSecurityNumber) {
 		this.socialSecurityNumber = socialSecurityNumber;
 	}
+
 
 	public String getPhone() {
 		return phone;
 	}
 
+
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
+
 
 	public Boolean getTreatmentConsent() {
 		return treatmentConsent;
 	}
 
+
 	public void setTreatmentConsent(Boolean treatmentConsent) {
 		this.treatmentConsent = treatmentConsent;
 	}
+
 
 	public Boolean getAnesthesiaConsent() {
 		return anesthesiaConsent;
 	}
 
+
 	public void setAnesthesiaConsent(Boolean anesthesiaConsent) {
 		this.anesthesiaConsent = anesthesiaConsent;
 	}
+
 
 	public String getBilling() {
 		return billing;
 	}
 
+
 	public void setBilling(String billing) {
 		this.billing = billing;
 	}
 
-	public Document getDocuments() {
+
+	public MedicalRecord getMedicalRecord() {
+		return medicalRecord;
+	}
+
+
+	public void setMedicalRecord(MedicalRecord medicalRecord) {
+		this.medicalRecord = medicalRecord;
+	}
+
+
+	public List<Document> getDocuments() {
 		return documents;
 	}
 
-	public void setDocuments(Document documents) {
+
+	public void setDocuments(List<Document> documents) {
 		this.documents = documents;
 	}
-    
     
 }

@@ -1,5 +1,7 @@
 package com.dynalar.dynalar.model.patient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,6 +24,7 @@ public class MedicalRecord {
     private String deceases;
 
     @OneToOne(mappedBy = "medicalRecord")
+    @JsonIgnore
     private Patient patient;
     
     public MedicalRecord() {
