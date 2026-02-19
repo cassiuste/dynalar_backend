@@ -26,7 +26,7 @@ public class Dentist extends User {
 	private Boolean fridayAfternoon;
 
 	@ManyToMany
-	@JoinTable(name = "dentist_treatments", joinColumns = @JoinColumn(name = "dentist_id"), inverseJoinColumns = @JoinColumn(name = "treatment_id"))
+	@JoinTable(name = "dentist_treatment", joinColumns = @JoinColumn(name = "dentist_id"), inverseJoinColumns = @JoinColumn(name = "treatment_id"))
 	private Set<Treatment> treatments;
 
 	public Dentist() {
