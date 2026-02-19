@@ -21,10 +21,11 @@ public class UserController {
 		return userRepository.findAll();
 	}
 	
-	@GetMapping("/login")
+	@PostMapping("/login")
 	public User login(@RequestParam String email, @RequestParam String password) {
 		User user = userRepository.findByEmail(email);
 		if (user != null && user.getPassword().equals(password)) {
+			user.setPassword(null); // Do not return the password
 			return user;
 		}
 		return null;
