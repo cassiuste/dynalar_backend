@@ -1,13 +1,16 @@
-//Implement the Login for the dentist to access the system. The dentist should be able to log in using their email and password. If the login is successful, return the user details; otherwise, return null.
-package com.example.demo.controller;
+package com.dynalar.dynalar.controller;
+
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.demo.model.user.User;
-import com.example.demo.repository.UserRepository;
+import com.dynalar.dynalar.respository.UserRepository;
+import com.dynalar.dynalar.model.user.User;
 
 @RestController
 @RequestMapping("/user")
@@ -22,11 +25,12 @@ public class UserController {
 	}
 	
 	@PostMapping("/login")
-	public User login(@RequestParam String email, @RequestParam String password) {
-		User user = userRepository.findByEmail(email);
-		if (user != null && user.getPassword().equals(password)) {
-			user.setPassword(null); // Do not return the password
-			return user;
+	public User login(@RequestBody User user) {	
+		Optional<User> newUser = userRepository.findByEmail(user.getEmail());
+		if (newUser.isPresent() && newUser.get().getPassword().equals(user.getPassword())) {
+			User loggedInUser = newUser.get();
+			loggedInUser.setPassword(null);
+			return loggedInUser;
 		}
 		return null;
 	}
