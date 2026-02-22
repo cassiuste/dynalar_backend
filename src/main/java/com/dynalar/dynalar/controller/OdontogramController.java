@@ -41,4 +41,58 @@ public class OdontogramController {
 		}
 	}
 	
+
+	@PostMapping("/patient/{patientId}")
+	public ResponseEntity<Odontogram> createOdontogram(@PathVariable Long patientId, @RequestBody Odontogram odontogram) {
+		try {
+			Optional<Patient> patientOpt = patientRepository.findById(patientId);
+			if (patientOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+			odontogram.setPatientId(patientOpt.get());
+            odontogram.setCreationDate(LocalDateTime.now());
+            Odontogram savedOdontogram = odontogramRepository.save(odontogram);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedOdontogram);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+	
+	@PutMapping("/odontogram/patient/{id}")
+	public ResponseEntity<Void> updateOdontogram(@PathVariable Long id, @RequestBody Odontogram updatedOdontogram) {
+		try {
+			
+			Optional<Odontogram> existingOpt = odontogramRepository.findByPatientId(id);
+			
+			if (existingOpt.isEmpty()) {
+				return ResponseEntity.notFound().build();
+			}
+			
+			Odontogram existingOdontogram = existingOpt.get();
+			
+			existingOdontogram.setToothConditions(updatedOdontogram.getToothConditions());
+			if (existingOdontogram.getToothConditions() != null) {
+                existingOdontogram.getToothConditions().forEach(cond -> cond.setOdontogram(existingOdontogram));
+            }
+			
+            odontogramRepository.save(updatedOdontogram);
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+	
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteOdontogram(@PathVariable Long id) {
+		try {
+			if (odontogramRepository.existsById(id)) {
+				odontogramRepository.deleteById(id);
+				return ResponseEntity.ok().build();
+			} else {
+				return ResponseEntity.notFound().build();
+			}
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
 }
