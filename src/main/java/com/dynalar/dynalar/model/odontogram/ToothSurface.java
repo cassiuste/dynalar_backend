@@ -4,21 +4,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "tooth")
-public class Tooth {
+public class ToothSurface {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private String face;
 	
-	private Integer number;
-
-	public Tooth() {
+	public ToothSurface() {
 	}
 
 	public Long getId() {
@@ -29,12 +24,12 @@ public class Tooth {
 		this.id = id;
 	}
 
-	public Integer getNumber() {
-		return number;
+	public String getFace() {
+		return face;
 	}
 
-	public void setNumber(Integer number) {
-		this.number = number;
+	public void setFace(String face) {
+		this.face = face;
 	}
-
+	
 }
