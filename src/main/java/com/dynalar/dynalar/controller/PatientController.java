@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import java.util.Optional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.dynalar.dynalar.model.patient.Patient;
 import com.dynalar.dynalar.respository.PatientRepository;
@@ -32,6 +33,7 @@ public class PatientController {
 		try {
 			return ResponseEntity.ok(patientRepository.findAll());
 		} catch (Exception e) {
+			e.printStackTrace();
 			return ResponseEntity.status(404).build();
 		}
 	}
@@ -92,4 +94,22 @@ public class PatientController {
 	        return ResponseEntity.status(404).build();
 	    }
 	}
+	
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
+	    try {
+	        Optional<Patient> patient = patientRepository.findById(id);
+	        if (patient.isPresent()) {
+	            patientRepository.deleteById(id);
+	            return ResponseEntity.noContent().build();
+	        } else {
+	            return ResponseEntity.notFound().build();
+	        }
+	    } catch (Exception e) {
+	        return ResponseEntity.status(404).build();
+	    }
+	}
+
+	
 }
