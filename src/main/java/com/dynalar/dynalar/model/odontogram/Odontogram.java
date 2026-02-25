@@ -37,6 +37,7 @@ public class Odontogram {
 	private List<OdontogramEntry> odontogramEntries = new ArrayList<>();
     
     public Odontogram() {
+    	this.creationDate = LocalDateTime.now();
 	}
 
 	public Long getId() {
@@ -54,15 +55,15 @@ public class Odontogram {
 	public void setCreationDate(LocalDateTime creationDate) {
 		this.creationDate = creationDate;
 	}
-
-	public Patient getPatientId() {
+	
+	public Patient getPatient() {
 		return patient;
 	}
 
-	public void setPatientId(Patient patientId) {
-		this.patient = patientId;
+	public void setPatient(Patient patient) {
+		this.patient = patient;
 	}
-	
+
 	public List<OdontogramEntry> getOdontogramEntries() {
 		return odontogramEntries;
 	}
