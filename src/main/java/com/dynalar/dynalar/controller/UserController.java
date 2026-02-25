@@ -1,6 +1,5 @@
-package com.dynalar.dynalar.controller;
 
-import java.util.Optional;
+package com.dynalar.dynalar.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,8 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.dynalar.dynalar.model.user.User; 
 import com.dynalar.dynalar.respository.UserRepository;
-import com.dynalar.dynalar.model.user.User;
+import org.springframework.web.bind.annotation.PostMapping;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
