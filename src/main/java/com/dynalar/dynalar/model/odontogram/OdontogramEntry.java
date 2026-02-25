@@ -1,5 +1,7 @@
 package com.dynalar.dynalar.model.odontogram;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,14 +12,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "tooth_condition")
-public class ToothCondition {
+@Table(name = "odontogram_entry")
+public class OdontogramEntry {
 
 	 	@Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long id;
 
 	    @ManyToOne
+	    @JsonIgnore
 	    private Odontogram odontogram;
 
 	    @ManyToOne
@@ -30,17 +33,10 @@ public class ToothCondition {
 	    private Pathology pathology;
 	    
 	    @Enumerated(EnumType.STRING)
-	    private ConditionType conditionType;
-
-	    public enum ConditionType {
-	        CARIES,
-	        OBTURACION,
-	        ENDODONCIA,
-	        FRACTURA,
-	        AUSENTE
-	    }
+	    private ProcessType processType;
 	    
-	    public ToothCondition() {
+	    
+	    public OdontogramEntry() {
 	    }
 
 		public Long getId() {
@@ -83,12 +79,12 @@ public class ToothCondition {
 			this.pathology = pathology;
 		}
 
-		public ConditionType getConditionType() {
-			return conditionType;
+		public ProcessType getProcess() {
+			return processType;
 		}
-
-		public void setConditionType(ConditionType conditionType) {
-			this.conditionType = conditionType;
+		
+		public void setProcess(ProcessType process) {
+			this.processType = process;
 		}
 	    
 }

@@ -11,7 +11,7 @@ public class ToothSurface {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String face;
+	private Face face;
 	
 	public ToothSurface() {
 	}
@@ -24,11 +24,11 @@ public class ToothSurface {
 		this.id = id;
 	}
 
-	public String getFace() {
+	public Face getFace() {
 		return face;
 	}
 
-	public void setFace(String face) {
+	public void setFace(Face face) {
 		this.face = face;
 	}
 	

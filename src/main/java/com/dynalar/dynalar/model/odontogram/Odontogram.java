@@ -1,9 +1,11 @@
 package com.dynalar.dynalar.model.odontogram;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.dynalar.dynalar.model.patient.Patient;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -13,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -25,12 +28,13 @@ public class Odontogram {
 	
 	private LocalDateTime creationDate;
 	
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name = "patient_id")
+	@JsonIgnore
 	private Patient patient;
 	
 	@OneToMany(mappedBy = "odontogram", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<ToothCondition> toothConditions;
+	private List<OdontogramEntry> odontogramEntries = new ArrayList<>();
     
     public Odontogram() {
 	}
@@ -58,13 +62,12 @@ public class Odontogram {
 	public void setPatientId(Patient patientId) {
 		this.patient = patientId;
 	}
-
-	public List<ToothCondition> getToothConditions() {
-		return toothConditions;
+	
+	public List<OdontogramEntry> getOdontogramEntries() {
+		return odontogramEntries;
 	}
-
-	public void setToothConditions(List<ToothCondition> toothConditions) {
-		this.toothConditions = toothConditions;
+	
+	public void setOdontogramEntries(List<OdontogramEntry> odontogramEntries) {
+		this.odontogramEntries = odontogramEntries;
 	}
-
 }
