@@ -8,5 +8,5 @@ import com.dynalar.dynalar.model.odontogram.Odontogram;
 
 public interface OdontogramRepository extends JpaRepository<Odontogram, Long> {
 
-	public Optional<Odontogram> findByPatientId(Long patientId);
+	public Optional<Odontogram> findByPatient_Id(Long patientId);
 }

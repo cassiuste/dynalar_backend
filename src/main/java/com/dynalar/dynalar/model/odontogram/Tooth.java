@@ -13,10 +13,11 @@ import jakarta.persistence.Table;
 public class Tooth {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	private Integer number;
+	
+	private String name;
 
 	public Tooth() {
 	}
@@ -35,6 +36,14 @@ public class Tooth {
 
 	public void setNumber(Integer number) {
 		this.number = number;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }
