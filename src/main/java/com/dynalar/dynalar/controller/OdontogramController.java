@@ -34,14 +34,17 @@ public class OdontogramController {
 	@GetMapping("/patient/{patientId}")
 	public ResponseEntity<Odontogram> getOdontogramByPatient(@PathVariable Long patientId) {
 		try {
-			Optional<Odontogram> odontogramOpt = odontogramRepository.findByPatientId(patientId);
+			Optional<Odontogram> odontogramOpt = odontogramRepository.findByPatient_Id(patientId);
 			return ResponseEntity.ok(odontogramOpt.orElse(null));
 		} catch (Exception e) {
+			e.printStackTrace();
 			return ResponseEntity.status(404).build();
 		}
 	}
 	
-
+	
+	// El odontograma se crea cuando se crea el paciente 
+	/*
 	@PostMapping("/patient/{patientId}")
 	public ResponseEntity<Odontogram> createOdontogram(@PathVariable Long patientId, @RequestBody Odontogram odontogram) {
 		try {
@@ -57,12 +60,14 @@ public class OdontogramController {
 			return ResponseEntity.badRequest().build();
 		}
 	}
+	*/
 	
-	@PutMapping("/odontogram/patient/{id}")
+	
+	@PutMapping("/patient/{id}")
 	public ResponseEntity<Void> updateOdontogram(@PathVariable Long id, @RequestBody Odontogram updatedOdontogram) {
 		try {
 			
-			Optional<Odontogram> existingOpt = odontogramRepository.findByPatientId(id);
+			Optional<Odontogram> existingOpt = odontogramRepository.findByPatient_Id(id);
 			
 			if (existingOpt.isEmpty()) {
 				return ResponseEntity.notFound().build();
@@ -70,12 +75,12 @@ public class OdontogramController {
 			
 			Odontogram existingOdontogram = existingOpt.get();
 			
-			existingOdontogram.setToothConditions(updatedOdontogram.getToothConditions());
-			if (existingOdontogram.getToothConditions() != null) {
-                existingOdontogram.getToothConditions().forEach(cond -> cond.setOdontogram(existingOdontogram));
+			existingOdontogram.setOdontogramEntries(updatedOdontogram.getOdontogramEntries());
+			if (existingOdontogram.getOdontogramEntries() != null) {
+                existingOdontogram.getOdontogramEntries().forEach(cond -> cond.setOdontogram(existingOdontogram));
             }
 			
-            odontogramRepository.save(updatedOdontogram);
+            odontogramRepository.save(existingOdontogram);
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().build();
@@ -85,12 +90,16 @@ public class OdontogramController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteOdontogram(@PathVariable Long id) {
 		try {
-			if (odontogramRepository.existsById(id)) {
-				odontogramRepository.deleteById(id);
-				return ResponseEntity.ok().build();
-			} else {
+			Optional<Odontogram> existingOpt = odontogramRepository.findByPatient_Id(id);
+			
+			if (existingOpt.isEmpty()) {
 				return ResponseEntity.notFound().build();
 			}
+			
+			Odontogram existingOdontogram = existingOpt.get();
+			
+			odontogramRepository.delete(existingOdontogram);
+			return ResponseEntity.ok().build();
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().build();
 		}

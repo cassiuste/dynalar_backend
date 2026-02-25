@@ -2,6 +2,8 @@ package com.dynalar.dynalar.model.patient;
 
 import java.util.List;
 
+import com.dynalar.dynalar.model.odontogram.Odontogram;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,6 +34,11 @@ public class Patient {
     private Boolean anesthesiaConsent;
     private String billing;
     
+
+    @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL)
+    private Odontogram odontogram;
+
+    
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "medical_record_id", unique = true)
     private MedicalRecord medicalRecord;
@@ -56,6 +63,9 @@ public class Patient {
 		this.lastName = lastName;
 		this.email = email;
 		this.dni = dni;
+		// Se crea solo un odontograma
+		this.odontogram = new Odontogram();
+		this.odontogram.setPatient(this);
     }
 
 
@@ -177,13 +187,12 @@ public class Patient {
 	public void setDocuments(List<Document> documents) {
 		this.documents = documents;
 	}
-	
+
 	public Odontogram getOdontogram() {
 		return odontogram;
 	}
 
 	public void setOdontogram(Odontogram odontogram) {
 		this.odontogram = odontogram;
-	}
-	
+	}    
 }
