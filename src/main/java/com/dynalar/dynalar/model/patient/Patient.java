@@ -57,6 +57,7 @@ public class Patient {
 		this.dni = dni;
 		// Se crea solo un odontograma
 		this.odontogram = new Odontogram();
+		this.odontogram.setPatient(this);
     }
 
 
