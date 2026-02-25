@@ -1,3 +1,4 @@
+
 package com.dynalar.dynalar.controller;
 
 import java.util.List;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import com.dynalar.dynalar.model.patient.Patient;
 import com.dynalar.dynalar.respository.PatientRepository;
@@ -48,5 +51,44 @@ public class PatientController {
 
 	    }
 	
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<Patient> getPatientById(@PathVariable Long id) {
+	    try {
+	        Patient patient = patientRepository.findById(id).orElse(null);
+	        if (patient == null) {
+	            return ResponseEntity.notFound().build();
+	        }
+	        return ResponseEntity.ok(patient);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(404).build();
+	    }
+	}
+	
+
+	
+	@PutMapping("/update")
+	public ResponseEntity<Patient> updatePatient(@RequestBody Patient updatedPatient) {
+	    try {
+	        Long id = updatedPatient.getId();
+	        if (id == null) {
+	            return ResponseEntity.badRequest().build();
+	        }
+	        
+	        Patient existingPatient = patientRepository.findById(id).orElse(null);
+	        if (existingPatient == null) {
+	            return ResponseEntity.notFound().build();
+	        }
+	        
+	        existingPatient.setName(updatedPatient.getName());
+	        existingPatient.setMedicalRecord(updatedPatient.getMedicalRecord());
+	        
+	        Patient savedPatient = patientRepository.save(existingPatient);
+	        
+	        return ResponseEntity.ok(savedPatient);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(404).build();
+	    }
 	}
 }

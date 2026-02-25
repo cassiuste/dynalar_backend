@@ -169,5 +169,5 @@ public class Patient {
 	public void setDocuments(List<Document> documents) {
 		this.documents = documents;
 	}
-    
+	
 }
