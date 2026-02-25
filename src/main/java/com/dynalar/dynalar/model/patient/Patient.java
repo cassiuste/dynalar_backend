@@ -11,6 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import com.dynalar.dynalar.model.odontogram.Odontogram;
+import com.dynalar.dynalar.model.Appointment;
 
 @Entity
 @Table(name = "patient")
@@ -34,8 +36,14 @@ public class Patient {
     @JoinColumn(name = "medical_record_id", unique = true)
     private MedicalRecord medicalRecord;
 
+    @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Odontogram odontogram;
+    
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Document> documents;
+    
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Appointment> appointments;
     
     public Patient() {
 	}
@@ -168,6 +176,14 @@ public class Patient {
 
 	public void setDocuments(List<Document> documents) {
 		this.documents = documents;
+	}
+	
+	public Odontogram getOdontogram() {
+		return odontogram;
+	}
+
+	public void setOdontogram(Odontogram odontogram) {
+		this.odontogram = odontogram;
 	}
 	
 }
