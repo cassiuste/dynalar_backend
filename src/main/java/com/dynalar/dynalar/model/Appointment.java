@@ -34,6 +34,14 @@ public class Appointment {
     @JoinColumn(name = "patient_id")
     private Patient patient;
 
+    @ManyToOne
+    @JoinColumn(name = "box_id")
+    private Box box;
+
+    @ManyToOne
+    @JoinColumn(name = "odontogram_id")
+    private Odontogram odontogram;
+
     private String reason;
     private Integer durationMinutes;
     private LocalTime startTime;
@@ -72,6 +80,22 @@ public class Appointment {
 
 	public void setPatient(Patient patient) {
 		this.patient = patient;
+	}
+
+	public Box getBox() {
+		return box;
+	}
+
+	public void setBox(Box box) {
+		this.box = box;
+	}
+
+	public Odontogram getOdontogram() {
+		return odontogram;
+	}
+
+	public void setOdontogram(Odontogram odontogram) {
+		this.odontogram = odontogram;
 	}
 
 	public String getReason() {
