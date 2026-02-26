@@ -34,10 +34,6 @@ public class Patient {
     private Boolean anesthesiaConsent;
     private String billing;
     
-
-    @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL)
-    private Odontogram odontogram;
-
     
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "medical_record_id", unique = true)
