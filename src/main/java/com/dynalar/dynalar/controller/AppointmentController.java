@@ -46,6 +46,72 @@ public class AppointmentController {
 			return ResponseEntity.badRequest().build();
 		}
 	}
+	@GetMapping("/{id}")
+	public ResponseEntity<Appointment> getAppointmentById(@PathVariable Long id) {
+		try {
+			Appointment appointment = appointmentRepository.findById(id).orElse(null);
+			if (appointment == null) {
+				return ResponseEntity.notFound().build();
+			}
+			return ResponseEntity.ok(appointment);
+		} catch (Exception e) {
+			return ResponseEntity.status(404).build();
+		}
+	}
 
+	@PutMapping("/update")
+	public ResponseEntity<Appointment> updateAppointment(@RequestBody Appointment updatedAppointment) {
+		try {
+			Long id = updatedAppointment.getId();
+			if (id == null) {
+				return ResponseEntity.badRequest().build();
+			}
+
+			Optional<Appointment> existingOpt = appointmentRepository.findById(id);
+			if (existingOpt.isEmpty()) {
+				return ResponseEntity.notFound().build();
+			}
+
+			Appointment existingAppointment = existingOpt.get();
+
+
+			existingAppointment.setReason(updatedAppointment.getReason());
+			existingAppointment.setDurationMinutes(updatedAppointment.getDurationMinutes());
+			existingAppointment.setStartTime(updatedAppointment.getStartTime());
+			existingAppointment.setEndTime(updatedAppointment.getEndTime());
+
+			if (updatedAppointment.getTreatment() != null) {
+				existingAppointment.setTreatment(updatedAppointment.getTreatment());
+			}
+			if (updatedAppointment.getDentist() != null) {
+				existingAppointment.setDentist(updatedAppointment.getDentist());
+			}
+			if (updatedAppointment.getPatient() != null) {
+				existingAppointment.setPatient(updatedAppointment.getPatient());
+			}
+
+			Appointment savedAppointment = appointmentRepository.save(existingAppointment);
+			return ResponseEntity.ok(savedAppointment);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(404).build();
+		}
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
+		try {
+			Optional<Appointment> appointment = appointmentRepository.findById(id);
+			if (appointment.isPresent()) {
+				appointmentRepository.deleteById(id);
+				return ResponseEntity.noContent().build();
+			} else {
+				return ResponseEntity.notFound().build();
+			}
+		} catch (Exception e) {
+			return ResponseEntity.status(404).build();
+		}
+	}
 	
 }
