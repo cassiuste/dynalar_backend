@@ -13,21 +13,11 @@ import jakarta.persistence.Table;
 public class Tooth {
 
 	@Id
-	private Long id;
-	
 	private Integer number;
 	
 	private String name;
 
 	public Tooth() {
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public Integer getNumber() {

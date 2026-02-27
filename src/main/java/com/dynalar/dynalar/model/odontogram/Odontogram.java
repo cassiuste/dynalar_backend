@@ -28,6 +28,8 @@ public class Odontogram {
 	
 	private LocalDateTime creationDate;
 	
+	private LocalDateTime modificationDate;
+	
 	@OneToOne
 	@JoinColumn(name = "patient_id")
 	@JsonIgnore
@@ -54,6 +56,14 @@ public class Odontogram {
 
 	public void setCreationDate(LocalDateTime creationDate) {
 		this.creationDate = creationDate;
+	}
+	
+	public LocalDateTime getModificationDate() {
+		return modificationDate;
+	}
+	
+	public void setModificationDate(LocalDateTime modificationDate) {
+		this.modificationDate = modificationDate;
 	}
 	
 	public Patient getPatient() {
