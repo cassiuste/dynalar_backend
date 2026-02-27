@@ -32,9 +32,8 @@ public class Patient {
     private Boolean treatmentConsent;
     private Boolean anesthesiaConsent;
     private String billing;
-    
 
-
+  
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "medical_record_id", unique = true)
     private MedicalRecord medicalRecord;
