@@ -26,9 +26,9 @@ public class OdontogramEntry {
 	    @ManyToOne
 	    private Tooth tooth;
 
-	    @ManyToOne
+	    @Enumerated(EnumType.STRING)
 	    private ToothSurface surface;
-
+	    
 	    @ManyToOne
 	    private Pathology pathology;
 	    
@@ -79,12 +79,12 @@ public class OdontogramEntry {
 			this.pathology = pathology;
 		}
 
-		public ProcessType getProcess() {
+		public ProcessType getProcessType() {
 			return processType;
 		}
-		
-		public void setProcess(ProcessType process) {
-			this.processType = process;
+
+		public void setProcessType(ProcessType processType) {
+			this.processType = processType;
 		}
 	    
 }
