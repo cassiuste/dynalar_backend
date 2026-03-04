@@ -33,83 +33,83 @@ public class Dentist extends User {
 
 	}
 
-	public boolean isMondayMorning() {
+	public Boolean getMondayMorning() {
 		return mondayMorning;
 	}
 
-	public void setMondayMorning(boolean mondayMorning) {
+	public void setMondayMorning(Boolean mondayMorning) {
 		this.mondayMorning = mondayMorning;
 	}
 
-	public boolean isMondayAfternoon() {
+	public Boolean getMondayAfternoon() {
 		return mondayAfternoon;
 	}
 
-	public void setMondayAfternoon(boolean mondayAfternoon) {
+	public void setMondayAfternoon(Boolean mondayAfternoon) {
 		this.mondayAfternoon = mondayAfternoon;
 	}
 
-	public boolean isTuesdayMorning() {
+	public Boolean getTuesdayMorning() {
 		return tuesdayMorning;
 	}
 
-	public void setTuesdayMorning(boolean tuesdayMorning) {
+	public void setTuesdayMorning(Boolean tuesdayMorning) {
 		this.tuesdayMorning = tuesdayMorning;
 	}
 
-	public boolean isTuesdayAfternoon() {
+	public Boolean getTuesdayAfternoon() {
 		return tuesdayAfternoon;
 	}
 
-	public void setTuesdayAfternoon(boolean tuesdayAfternoon) {
+	public void setTuesdayAfternoon(Boolean tuesdayAfternoon) {
 		this.tuesdayAfternoon = tuesdayAfternoon;
 	}
 
-	public boolean isWednesdayMorning() {
+	public Boolean getWednesdayMorning() {
 		return wednesdayMorning;
 	}
 
-	public void setWednesdayMorning(boolean wednesdayMorning) {
+	public void setWednesdayMorning(Boolean wednesdayMorning) {
 		this.wednesdayMorning = wednesdayMorning;
 	}
 
-	public boolean isWednesdayAfternoon() {
+	public Boolean getWednesdayAfternoon() {
 		return wednesdayAfternoon;
 	}
 
-	public void setWednesdayAfternoon(boolean wednesdayAfternoon) {
+	public void setWednesdayAfternoon(Boolean wednesdayAfternoon) {
 		this.wednesdayAfternoon = wednesdayAfternoon;
 	}
 
-	public boolean isThursdayMorning() {
+	public Boolean getThursdayMorning() {
 		return thursdayMorning;
 	}
 
-	public void setThursdayMorning(boolean thursdayMorning) {
+	public void setThursdayMorning(Boolean thursdayMorning) {
 		this.thursdayMorning = thursdayMorning;
 	}
 
-	public boolean isThursdayAfternoon() {
+	public Boolean getThursdayAfternoon() {
 		return thursdayAfternoon;
 	}
 
-	public void setThursdayAfternoon(boolean thursdayAfternoon) {
+	public void setThursdayAfternoon(Boolean thursdayAfternoon) {
 		this.thursdayAfternoon = thursdayAfternoon;
 	}
 
-	public boolean isFridayMorning() {
+	public Boolean getFridayMorning() {
 		return fridayMorning;
 	}
 
-	public void setFridayMorning(boolean fridayMorning) {
+	public void setFridayMorning(Boolean fridayMorning) {
 		this.fridayMorning = fridayMorning;
 	}
 
-	public boolean isFridayAfternoon() {
+	public Boolean getFridayAfternoon() {
 		return fridayAfternoon;
 	}
 
-	public void setFridayAfternoon(boolean fridayAfternoon) {
+	public void setFridayAfternoon(Boolean fridayAfternoon) {
 		this.fridayAfternoon = fridayAfternoon;
 	}
 
@@ -120,5 +120,4 @@ public class Dentist extends User {
 	public void setTreatments(Set<Treatment> treatments) {
 		this.treatments = treatments;
 	}
-
 }

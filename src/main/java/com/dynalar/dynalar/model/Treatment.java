@@ -3,6 +3,7 @@ package com.dynalar.dynalar.model;
 import java.util.Set;
 
 import com.dynalar.dynalar.model.user.Dentist;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,7 +26,9 @@ public class Treatment {
 	
 	private Integer durationMinutes;
 
+    
 	@ManyToMany(mappedBy = "treatments")
+	@JsonIgnore 
 	private Set<Dentist> dentist;
 	
 	public Treatment() {
