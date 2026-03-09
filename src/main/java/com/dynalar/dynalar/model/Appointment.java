@@ -1,6 +1,6 @@
 package com.dynalar.dynalar.model;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 import com.dynalar.dynalar.model.odontogram.Odontogram;
 import com.dynalar.dynalar.model.patient.Patient;
@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "appointment")
 public class Appointment {
-
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -44,8 +44,8 @@ public class Appointment {
 
     private String reason;
     private Integer durationMinutes;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     
     public Appointment() {
 	}
@@ -114,20 +114,20 @@ public class Appointment {
 		this.durationMinutes = durationMinutes;
 	}
 
-	public LocalTime getStartTime() {
-		return startTime;
-	}
+	public LocalDateTime getStartTime() {
+        return startTime;
+    }
 
-	public void setStartTime(LocalTime startTime) {
-		this.startTime = startTime;
-	}
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
 
-	public LocalTime getEndTime() {
-		return endTime;
-	}
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
 
-	public void setEndTime(LocalTime endTime) {
-		this.endTime = endTime;
-	}
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
     
 }
