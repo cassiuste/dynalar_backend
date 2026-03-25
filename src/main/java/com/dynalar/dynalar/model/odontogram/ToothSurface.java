@@ -1,8 +1,12 @@
 package com.dynalar.dynalar.model.odontogram;
 
 public enum ToothSurface {
-	DISTAL,
+    DISTAL,
     OCLUSAL,
     INCISAL,
-    COMPLET	
+    COMPLET,
+    MESIAL,
+    VESTIBULAR,
+    LINGUAL,
+    NONE
 }

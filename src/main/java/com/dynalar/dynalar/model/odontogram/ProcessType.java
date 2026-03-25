@@ -2,5 +2,6 @@ package com.dynalar.dynalar.model.odontogram;
 
 public enum ProcessType {
 	FET,
-    ABSENT
+	PER_FER,
+    ABSENCIA_NATURAL
     }
