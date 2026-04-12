@@ -2,6 +2,7 @@ package com.dynalar.dynalar.model.odontogram;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,13 +28,15 @@ public class OdontogramEntry {
 	    private Tooth tooth;
 
 	    @Enumerated(EnumType.STRING)
+	    @Column(name = "surface", length = 30)
 	    private ToothSurface surface;
 	    
 	    @ManyToOne
-	    private Pathology pathology;
+	    private DentalProcess dentalProcess;
 	    
 	    @Enumerated(EnumType.STRING)
-	    private ProcessType processType;
+	    @Column(name = "process_status", length = 30)
+	    private ProcessStatus processStatus;
 	    
 	    
 	    public OdontogramEntry() {
@@ -71,20 +74,20 @@ public class OdontogramEntry {
 			this.surface = surface;
 		}
 
-		public Pathology getPathology() {
-			return pathology;
+
+		public DentalProcess getDentalProcess() {
+			return dentalProcess;
 		}
 
-		public void setPathology(Pathology pathology) {
-			this.pathology = pathology;
+		public void setDentalProcess(DentalProcess dentalProcess) {
+			this.dentalProcess = dentalProcess;
 		}
 
-		public ProcessType getProcessType() {
-			return processType;
+		public ProcessStatus getProcessStatus() {
+			return processStatus;
 		}
-
-		public void setProcessType(ProcessType processType) {
-			this.processType = processType;
+		
+		public void setProcessStatus(ProcessStatus processStatus) {
+			this.processStatus = processStatus;
 		}
-	    
 }
