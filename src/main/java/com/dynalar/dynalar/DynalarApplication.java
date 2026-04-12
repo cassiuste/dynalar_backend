@@ -9,5 +9,4 @@ public class DynalarApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DynalarApplication.class, args);
 	}
-
 }

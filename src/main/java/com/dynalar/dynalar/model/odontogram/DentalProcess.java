@@ -7,8 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "pathology")
-public class Pathology {
+@Table(name = "dental_process")
+public class DentalProcess {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +16,7 @@ public class Pathology {
 	
 	private String name;
 	
-	public Pathology() {
+	public DentalProcess() {
 	}
 	
 	public Long getId() {
