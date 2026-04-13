@@ -30,6 +30,25 @@ public class Document {
     public Document() {
     }
 
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+	public String getType() {
+		return type;
+	}
+
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+
 	public Patient getPatient() {
 		return patient;
 	}
