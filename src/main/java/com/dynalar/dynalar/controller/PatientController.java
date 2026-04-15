@@ -84,17 +84,22 @@ public class PatientController {
 	            return ResponseEntity.notFound().build();
 	        }
 	        
+	        // Actualizamos todos los campos que SÍ existen en tu Patient.java
 	        existingPatient.setName(updatedPatient.getName());
+	        existingPatient.setLastName(updatedPatient.getLastName());
+	        existingPatient.setDni(updatedPatient.getDni());
+	        existingPatient.setPhone(updatedPatient.getPhone());
+	        existingPatient.setEmail(updatedPatient.getEmail());
 	        existingPatient.setMedicalRecord(updatedPatient.getMedicalRecord());
 	        
 	        Patient savedPatient = patientRepository.save(existingPatient);
 	        
 	        return ResponseEntity.ok(savedPatient);
 	    } catch (Exception e) {
-	        return ResponseEntity.status(404).build();
+	        // Usamos 500 (Internal Server Error) si algo falla en el guardado
+	        return ResponseEntity.status(500).build();
 	    }
 	}
-	
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
