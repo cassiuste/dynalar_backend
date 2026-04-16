@@ -1,6 +1,5 @@
 package com.dynalar.dynalar.model.patient;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import com.dynalar.dynalar.model.odontogram.Odontogram;
@@ -26,9 +25,6 @@ public class Patient {
 
     private String name;
     private String lastName;
-    @Enumerated(EnumType.STRING)
-    private Sex sex;
-    private LocalDate birthDate;
     private String email;
     private String dni;
     private String socialSecurityNumber;
@@ -107,36 +103,6 @@ public class Patient {
 
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-
-	public Sex getSex() {
-		return sex;
-	}
-
-
-	public void setSex(Sex sex) {
-		this.sex = sex;
-	}
-
-
-	public LocalDate getBirthDate() {
-		return birthDate;
-	}
-
-
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
-	}
-
-
-	public List<Appointment> getAppointments() {
-		return appointments;
-	}
-
-
-	public void setAppointments(List<Appointment> appointments) {
-		this.appointments = appointments;
 	}
 
 
@@ -225,5 +191,5 @@ public class Patient {
 
 	public void setOdontogram(Odontogram odontogram) {
 		this.odontogram = odontogram;
-	}
+	}    
 }
