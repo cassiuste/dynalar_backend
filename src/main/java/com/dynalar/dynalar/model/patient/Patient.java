@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.dynalar.dynalar.model.odontogram.Odontogram;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -48,6 +49,7 @@ public class Patient {
     private List<Document> documents;
     
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Appointment> appointments;
     
     public Patient() {
