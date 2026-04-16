@@ -26,6 +26,7 @@ public class Patient {
 
     private String name;
     private String lastName;
+    @Enumerated(EnumType.STRING)
     private Sex sex;
     private LocalDate birthDate;
     private String email;
@@ -224,5 +225,5 @@ public class Patient {
 
 	public void setOdontogram(Odontogram odontogram) {
 		this.odontogram = odontogram;
-	}    
+	}
 }
