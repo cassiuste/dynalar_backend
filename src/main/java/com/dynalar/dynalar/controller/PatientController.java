@@ -84,33 +84,22 @@ public class PatientController {
 	            return ResponseEntity.notFound().build();
 	        }
 	        
-	        // Actualizamos todos los campos del modelo Patient
+	        // Actualizamos todos los campos que SÍ existen en tu Patient.java
 	        existingPatient.setName(updatedPatient.getName());
 	        existingPatient.setLastName(updatedPatient.getLastName());
-	        existingPatient.setSex(updatedPatient.getSex()); 
-	        existingPatient.setBirthDate(updatedPatient.getBirthDate());
-	        existingPatient.setEmail(updatedPatient.getEmail());
 	        existingPatient.setDni(updatedPatient.getDni());
 	        existingPatient.setPhone(updatedPatient.getPhone());
-	        existingPatient.setSocialSecurityNumber(updatedPatient.getSocialSecurityNumber());
-	        existingPatient.setBilling(updatedPatient.getBilling());
-	        existingPatient.setTreatmentConsent(updatedPatient.getTreatmentConsent());
-	        existingPatient.setAnesthesiaConsent(updatedPatient.getAnesthesiaConsent());
-	        
-	        // Manejo del MedicalRecord
-	        if (updatedPatient.getMedicalRecord() != null) {
-	            updatedPatient.getMedicalRecord().setPatient(existingPatient);
-	            existingPatient.setMedicalRecord(updatedPatient.getMedicalRecord());
-	        }
+	        existingPatient.setEmail(updatedPatient.getEmail());
+	        existingPatient.setMedicalRecord(updatedPatient.getMedicalRecord());
 	        
 	        Patient savedPatient = patientRepository.save(existingPatient);
+	        
 	        return ResponseEntity.ok(savedPatient);
 	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(500).build(); // Error interno si algo falla
+	        // Usamos 500 (Internal Server Error) si algo falla en el guardado
+	        return ResponseEntity.status(500).build();
 	    }
 	}
-	
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
