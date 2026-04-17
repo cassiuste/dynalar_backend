@@ -105,15 +105,14 @@ public class DocumentController {
     }
 
     
-    @PutMapping("/patient/{patientId}/{documentId}/name")
+    @PutMapping("/{documentId}/name")
     public ResponseEntity<Document> updateDocumentName(
-            @PathVariable Long patientId,
             @PathVariable Long documentId,
             @RequestParam("newName") String newName) {
             
         Document doc = documentRepository.findById(documentId).orElse(null);
         
-        if (doc == null || !doc.getPatient().getId().equals(patientId)) {
+        if (doc == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); 
         }
 
@@ -161,13 +160,13 @@ public class DocumentController {
     }
     
     
-    @DeleteMapping("/patient/{patientId}/{documentId}")
-    public ResponseEntity<Void> deleteDocument(@PathVariable Long patientId, @PathVariable Long documentId) {
+    @DeleteMapping("/{documentId}")
+    public ResponseEntity<Void> deleteDocument(@PathVariable Long documentId) {
         Document doc = documentRepository.findById(documentId).orElse(null);
-        if (doc == null || !doc.getPatient().getId().equals(patientId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        
+  	  	if (doc == null) {
+			return ResponseEntity.notFound().build();
+		}
+    
         try {
             if (doc.getDocumentUrl() != null) {
                 Path filePath = rootPath.resolve(doc.getDocumentUrl());
