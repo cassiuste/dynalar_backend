@@ -26,6 +26,7 @@ public class Document {
     @JsonIgnore
     private Patient patient;
 
+	private String name;
     private String type;
     private String documentUrl;
     private LocalDateTime creationDate;
@@ -40,7 +41,14 @@ public class Document {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	public String getName() {
+		return name;
+	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getType() {
 		return type;
@@ -51,7 +59,6 @@ public class Document {
 		this.type = type;
 	}
 
-
 	public Patient getPatient() {
 		return patient;
 	}
@@ -59,14 +66,7 @@ public class Document {
 	public void setPatient(Patient patient) {
 		this.patient = patient;
 	}
-
-	public String getDocumentType() {
-		return type;
-	}
-
-	public void setDocumentType(String documentType) {
-		this.type = documentType;
-	}
+	
 
 	public String getDocumentUrl() {
 		return documentUrl;
