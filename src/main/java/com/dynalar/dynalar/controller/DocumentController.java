@@ -44,11 +44,24 @@ public class DocumentController {
         	return ResponseEntity.notFound().build();
         }
 
+        String originalName = file.getOriginalFilename();
+        if (originalName == null || originalName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String lowerCaseName = originalName.toLowerCase();
+        
+        if (!lowerCaseName.endsWith(".pdf") && !lowerCaseName.endsWith(".jpg") && 
+            !lowerCaseName.endsWith(".jpeg") && !lowerCaseName.endsWith(".png")) {
+            return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).build(); 
+        }
+        
         try {
             Document doc = new Document();
             doc.setPatient(patient);
-            doc.setDocumentType(type);
+            doc.setType(type);
             doc.setCreationDate(LocalDateTime.now());
+            doc.setName(file.getOriginalFilename());
             doc = documentRepository.save(doc);
 
             String relativePath = savePhysicalFile(file, patientId, doc.getId());
@@ -75,7 +88,7 @@ public class DocumentController {
             if (resource.exists() || resource.isReadable()) {
                 return ResponseEntity.ok()
                         .contentType(MediaType.APPLICATION_PDF)
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + doc.getName() + "\"")
                         .body(resource);
             } else {
                 return ResponseEntity.notFound().build();
@@ -91,6 +104,39 @@ public class DocumentController {
         return ResponseEntity.ok(documentRepository.findByPatientId(patientId));
     }
 
+    
+    @PutMapping("/patient/{patientId}/{documentId}/name")
+    public ResponseEntity<Document> updateDocumentName(
+            @PathVariable Long patientId,
+            @PathVariable Long documentId,
+            @RequestParam("newName") String newName) {
+            
+        Document doc = documentRepository.findById(documentId).orElse(null);
+        
+        if (doc == null || !doc.getPatient().getId().equals(patientId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); 
+        }
+
+        if (newName == null || newName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        String originalName = doc.getName();
+        String extension = "";
+        
+        if (originalName != null && originalName.contains(".")) {
+            extension = originalName.substring(originalName.lastIndexOf("."));
+        }
+        
+        String finalName = newName.trim();
+        if (finalName.contains(".")) {
+            finalName = finalName.substring(0, finalName.lastIndexOf("."));
+        }
+        doc.setName(finalName + extension);
+        documentRepository.save(doc);
+        return ResponseEntity.ok(doc);
+    }
+    
     
     private String savePhysicalFile(MultipartFile file, Long patientId, Long docId) throws IOException {
         String patientFolder = "patient_" + patientId;
@@ -112,5 +158,25 @@ public class DocumentController {
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
         return patientFolder + "/" + fileName;
+    }
+    
+    
+    @DeleteMapping("/patient/{patientId}/{documentId}")
+    public ResponseEntity<Void> deleteDocument(@PathVariable Long patientId, @PathVariable Long documentId) {
+        Document doc = documentRepository.findById(documentId).orElse(null);
+        if (doc == null || !doc.getPatient().getId().equals(patientId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        try {
+            if (doc.getDocumentUrl() != null) {
+                Path filePath = rootPath.resolve(doc.getDocumentUrl());
+                Files.deleteIfExists(filePath);
+            }
+            documentRepository.deleteById(documentId);
+            return ResponseEntity.noContent().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
