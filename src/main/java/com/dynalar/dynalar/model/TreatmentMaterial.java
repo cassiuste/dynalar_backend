@@ -1,5 +1,7 @@
 package com.dynalar.dynalar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,10 +20,12 @@ public class TreatmentMaterial {
 
     @ManyToOne
     @JoinColumn(name = "treatment_id")
+    @JsonIgnore
     private Treatment treatment;
 
     @ManyToOne
     @JoinColumn(name = "material_id")
+    @JsonIgnore
     private Material material;
 
     private Integer quantityRequired;

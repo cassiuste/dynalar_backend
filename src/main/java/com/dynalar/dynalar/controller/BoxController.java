@@ -70,7 +70,7 @@ public class BoxController {
 			}
 			
 			LocalDateTime now = LocalDateTime.now();
-			if (appointmentRepository.existByBox_NumberAndStartTimeAfter(number, now)) {
+			if (appointmentRepository.existsByBox_NumberAndStartTimeAfter(number, now)) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 			}
 			
