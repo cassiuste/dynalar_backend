@@ -157,6 +157,32 @@ public class TreatmentController {
 	    }
 	}
 	
+	
+	@PutMapping("/{id}/materials/{materialId}")
+	public ResponseEntity<Void> updateMaterialInTreatment(
+	        @PathVariable Long id, 
+	        @PathVariable Long materialId, 
+	        @RequestBody TreatmentMaterialRequest treatmentMaterialRequest) {
+	    try {
+	        Optional<TreatmentMaterial> relationOpt = treatmentMaterialRepository
+	                .findByTreatmentIdAndMaterialId(id, materialId);
+
+	        if (relationOpt.isEmpty()) {
+	            return ResponseEntity.notFound().build();
+	        }
+
+	        TreatmentMaterial treatmentMaterial = relationOpt.get();
+	        treatmentMaterial.setQuantityRequired(treatmentMaterialRequest.getQuantityRequired());
+	        treatmentMaterialRepository.save(treatmentMaterial);
+	        
+	        return ResponseEntity.ok().build();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	    }
+	}
+	
+	
 	@DeleteMapping("/{id}/materials/{materialId}")
 	public ResponseEntity<Void> removeMaterialFromTreatment(
 	        @PathVariable Long id, 

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,12 +28,8 @@ public class MaterialController {
 	
 	
 	@PostMapping()
-	public ResponseEntity<Material> createMaterial(@RequestParam String name, @RequestParam Integer availableStock, @RequestParam Integer minimumStock) {
+	public ResponseEntity<Material> createMaterial(@RequestBody Material material) {
 		try {
-			Material material = new Material();
-			material.setName(name);
-			material.setAvailableStock(availableStock);
-			material.setMinimumStock(minimumStock);
 			return ResponseEntity.ok(materialRepository.save(material));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
