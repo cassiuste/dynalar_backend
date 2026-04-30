@@ -30,6 +30,7 @@ public class MaterialController {
 	@PostMapping()
 	public ResponseEntity<Material> createMaterial(@RequestBody Material material) {
 		try {
+			material.setId(null);
 			return ResponseEntity.ok(materialRepository.save(material));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -37,19 +38,18 @@ public class MaterialController {
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<Material> updateMaterial(@PathVariable Long id, @RequestParam String name, @RequestParam Integer availableStock, @RequestParam Integer minimumStock) {
+	public ResponseEntity<Material> updateMaterial(@PathVariable Long id, @RequestBody Material updatedMaterial) {
 		try {
 			Optional<Material> materialOpt = materialRepository.findById(id);
+			
 			if (materialOpt.isEmpty()) {
 				return ResponseEntity.notFound().build();
 			}
-
-			Material material = materialOpt.get();
-			material.setName(name);
-			material.setAvailableStock(availableStock);
-			material.setMinimumStock(minimumStock);
-			return ResponseEntity.ok(materialRepository.save(material));
-		} catch (Exception e) {
+			
+			updatedMaterial.setId(id); 
+	        Material savedMaterial = materialRepository.save(updatedMaterial);
+	        
+	        return ResponseEntity.ok(savedMaterial);} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
