@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dynalar.dynalar.dto.AutoAssignRequest;
 import com.dynalar.dynalar.model.Appointment;
+import com.dynalar.dynalar.model.Box;
 import com.dynalar.dynalar.respository.AppointmentRepository;
+import com.dynalar.dynalar.respository.BoxRepository;
 import com.dynalar.dynalar.respository.DentistRepository;
 import com.dynalar.dynalar.respository.PatientRepository;
 import com.dynalar.dynalar.respository.TreatmentRepository;
@@ -39,10 +41,11 @@ public class AppointmentController {
 	
 	@Autowired
 	private DentistRepository dentistRepository;
+	
+	@Autowired
+	private BoxRepository boxRepository;
 
-	// ---------------------------------------------------------
-	// MÉTODO INTELIGENTE: AUTO-ASIGNAR CITA
-	// ---------------------------------------------------------
+
 	@PostMapping("/auto-assign")
 	public ResponseEntity<?> autoAssignAppointment(@RequestBody AutoAssignRequest request) {
 		try {
@@ -124,14 +127,41 @@ public class AppointmentController {
 				return ResponseEntity.status(HttpStatus.CONFLICT).body("Sin Doctores Disponibles el dia y hora seleccionada. Pruebe otro dia u otra hora.");
 			}
 
+			// Verifica que hay un box libre para esa hora
+			LocalDateTime startOfDay = requestedStart.toLocalDate().atStartOfDay();
+			LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+			List<Box> allBoxes = (List<Box>) boxRepository.findAll();
+	        Box selectedBox = null;
+
+	        for (Box box : allBoxes) {
+	            List<Appointment> boxApps = appointmentRepository.findByBox_NumberAndStartTimeBetween(box.getNumber(), startOfDay, endOfDay);
+	            boolean boxOverlap = false;
+	            for (Appointment app : boxApps) {
+	                LocalDateTime appEndWithCleaning = app.getEndTime().plusMinutes(15);
+	                if (requestedStart.isBefore(appEndWithCleaning) && requestedEndWithCleaning.isAfter(app.getStartTime())) {
+	                    boxOverlap = true;
+	                    break;
+	                }
+	            }
+	            if (!boxOverlap) {
+	                selectedBox = box;
+	                break;
+	            }
+	        }
+
+	        if (selectedBox == null) {
+	            return ResponseEntity.status(HttpStatus.CONFLICT).body("No hay Boxes (sillones) disponibles para esta hora.");
+	        }
+			
 			// 5. Crear y guardar la cita con el doctor asignado automáticamente
 			Appointment newAppointment = new Appointment();
 			newAppointment.setPatient(patient);
 			newAppointment.setTreatment(treatment);
 			newAppointment.setDentist(selectedDentist);
 			newAppointment.setDurationMinutes(duration);
+			newAppointment.setBox(selectedBox);
 			newAppointment.setStartTime(requestedStart);
-			newAppointment.setEndTime(requestedEnd); // Guardamos la hora médica real. La limpieza es implícita.
+			newAppointment.setEndTime(requestedEnd);
 			newAppointment.setReason("Cita Auto-Agendada");
 
 			Appointment savedAppointment = appointmentRepository.save(newAppointment);
@@ -249,22 +279,24 @@ public class AppointmentController {
 
 			int totalDuration = treatment.getDurationMinutes() + 15; // Duración + Limpieza
 			List<com.dynalar.dynalar.model.user.Dentist> qualifiedDentists = dentistRepository.findByTreatments_Id(treatment.getId());
+			// 1. Cargamos todos los boxes una sola vez fuera de los bucles de días/horas
+			List<Box> allBoxes = (List<Box>) boxRepository.findAll();
 
-			// Formato de respuesta: Map<Fecha, Lista de Horas> -> Ejemplo: {"2026-03-09": ["09:00", "09:30"]}
 			java.util.Map<String, java.util.List<String>> availableSlotsPerDay = new java.util.TreeMap<>();
 
-			// Bucle día a día desde la fecha de inicio hasta la fecha fin
 			java.time.LocalDate currentDate = request.getStartDate();
 			while (!currentDate.isAfter(request.getEndDate())) {
 				java.time.DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
 				java.util.List<String> dailySlots = new java.util.ArrayList<>();
+				
+				// 2. Definimos el inicio y fin del día una sola vez por día
+				LocalDateTime startOfDay = currentDate.atStartOfDay();
+				LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 
-				// Generar posibles huecos cada 30 minutos
 				java.time.LocalTime[] possibleTimes = {
 					java.time.LocalTime.of(9, 0), java.time.LocalTime.of(9, 30), java.time.LocalTime.of(10, 0), java.time.LocalTime.of(10, 30),
 					java.time.LocalTime.of(11, 0), java.time.LocalTime.of(11, 30), java.time.LocalTime.of(12, 0), java.time.LocalTime.of(12, 30),
 					java.time.LocalTime.of(13, 0), java.time.LocalTime.of(13, 30),
-					// Turno de tarde
 					java.time.LocalTime.of(15, 0), java.time.LocalTime.of(15, 30), java.time.LocalTime.of(16, 0), java.time.LocalTime.of(16, 30),
 					java.time.LocalTime.of(17, 0), java.time.LocalTime.of(17, 30), java.time.LocalTime.of(18, 0), java.time.LocalTime.of(18, 30),
 					java.time.LocalTime.of(19, 0), java.time.LocalTime.of(19, 30)
@@ -277,11 +309,10 @@ public class AppointmentController {
 					boolean isMorningSlot = slotStart.getHour() < 14 && slotEnd.toLocalTime().compareTo(java.time.LocalTime.of(14, 0)) <= 0;
 					boolean isAfternoonSlot = slotStart.getHour() >= 15 && slotEnd.toLocalTime().compareTo(java.time.LocalTime.of(20, 0)) <= 0;
 
-					if (!isMorningSlot && !isAfternoonSlot) continue; // Si el hueco se sale del horario, lo saltamos
+					if (!isMorningSlot && !isAfternoonSlot) continue;
 
 					boolean isSlotAvailable = false;
 
-					// Comprobar si al menos UN dentista puede coger este hueco
 					for (com.dynalar.dynalar.model.user.Dentist dentist : qualifiedDentists) {
 						boolean worksShift = false;
 						switch (dayOfWeek) {
@@ -294,11 +325,7 @@ public class AppointmentController {
 						}
 
 						if (worksShift) {
-							// Verificar que NO hay solapamiento con otras citas de este dentista
-							LocalDateTime startOfDay = currentDate.atStartOfDay();
-							LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 							List<Appointment> existingApps = appointmentRepository.findByDentistIdAndStartTimeBetween(dentist.getId(), startOfDay, endOfDay);
-							
 							boolean hasOverlap = false;
 							for (Appointment app : existingApps) {
 								LocalDateTime appEndWithCleaning = app.getEndTime().plusMinutes(15);
@@ -307,27 +334,40 @@ public class AppointmentController {
 									break;
 								}
 							}
-
 							if (!hasOverlap) {
 								isSlotAvailable = true;
-								break; // Encontramos un doctor libre, el hueco es válido
+								break; 
 							}
 						}
 					}
 
-					// Si encontramos al menos un doctor libre para esta hora, añadimos la hora a la lista del día
 					if (isSlotAvailable) {
-						// Formateamos la hora para que el frontend la vea bonita (ej: "09:00")
-						dailySlots.add(String.format("%02d:%02d", slotTime.getHour(), slotTime.getMinute()));
+					    boolean hasAvailableBox = false;
+					    for (Box box : allBoxes) {
+					        List<Appointment> boxApps = appointmentRepository.findByBox_NumberAndStartTimeBetween(box.getNumber(), startOfDay, endOfDay);
+					        boolean boxOverlap = false;
+					        for (Appointment app : boxApps) {
+					            LocalDateTime appEndWithCleaning = app.getEndTime().plusMinutes(15);
+					            if (slotStart.isBefore(appEndWithCleaning) && slotEnd.isAfter(app.getStartTime())) {
+					                boxOverlap = true;
+					                break;
+					            }
+					        }
+					        if (!boxOverlap) {
+					            hasAvailableBox = true;
+					            break;
+					        }
+					    }
+					    
+					    if (hasAvailableBox) {
+					        dailySlots.add(String.format("%02d:%02d", slotTime.getHour(), slotTime.getMinute()));
+					    }
 					}
 				}
 
-				// Solo añadimos el día al JSON si tiene horas disponibles
 				if (!dailySlots.isEmpty()) {
 					availableSlotsPerDay.put(currentDate.toString(), dailySlots);
 				}
-
-				// Avanzamos al día siguiente
 				currentDate = currentDate.plusDays(1);
 			}
 

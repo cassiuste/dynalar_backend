@@ -12,5 +12,6 @@ import com.dynalar.dynalar.model.Appointment;
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
 	List<Appointment> findByDentistIdAndStartTimeBetween(Long dentistId, LocalDateTime start, LocalDateTime end);
+	List<Appointment> findByBox_NumberAndStartTimeBetween(Integer boxNumber, LocalDateTime start, LocalDateTime end);
 	boolean existsByBox_NumberAndStartTimeAfter(Integer boxNumber, LocalDateTime start);
 }
