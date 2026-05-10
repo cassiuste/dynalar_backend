@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,14 +36,15 @@ public class Patient {
     private Boolean anesthesiaConsent;
     private String billing;
 
-  
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "medical_record_id", unique = true)
+    @Enumerated(EnumType.STRING)
+    private Sex sex;
+    
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "medical_record_id", referencedColumnName = "id")
     private MedicalRecord medicalRecord;
 
     @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private Odontogram odontogram;
-    
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Document> documents;
     
@@ -67,7 +70,14 @@ public class Patient {
 		this.odontogram.setPatient(this);
     }
 
+    public Sex getSex() {
+        return sex;
+    }
 
+    public void setSex(Sex sex) {
+        this.sex = sex;
+    }
+    
 	public Long getId() {
 		return id;
 	}
