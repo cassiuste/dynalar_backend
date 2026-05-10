@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
+import com.dynalar.dynalar.model.odontogram.Odontogram;
 import com.dynalar.dynalar.model.patient.Patient;
 import com.dynalar.dynalar.respository.PatientRepository;
 
@@ -38,22 +39,30 @@ public class PatientController {
 		}
 	}
 	
-	@PostMapping()
+	@PostMapping
 	public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
 	    try {
+	
 	        if (patient.getMedicalRecord() != null) {
-	            patient.getMedicalRecord().setPatient(patient); 
+	            patient.getMedicalRecord().setPatient(patient);
 	        }
 	        
-	        Patient newPatient = patientRepository.save(patient); 
+	     
+	        if (patient.getOdontogram() == null) {
+	            Odontogram o = new Odontogram();
+	            o.setPatient(patient);
+	            patient.setOdontogram(o);
+	        } else {
+	            patient.getOdontogram().setPatient(patient);
+	        }
 	        
-	        return ResponseEntity.status(HttpStatus.CREATED).body(newPatient);	        
+	       
+	        Patient savedPatient = patientRepository.save(patient);
+	        return ResponseEntity.status(HttpStatus.CREATED).body(savedPatient);
 	    } catch (Exception e) {
-	        e.printStackTrace(); 
-			return ResponseEntity.badRequest().build();
-
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	    }
-	
 	}
 
 	@GetMapping("/{id}")
@@ -84,19 +93,23 @@ public class PatientController {
 	            return ResponseEntity.notFound().build();
 	        }
 	        
-	        // Actualizamos todos los campos que SÍ existen en tu Patient.java
 	        existingPatient.setName(updatedPatient.getName());
 	        existingPatient.setLastName(updatedPatient.getLastName());
 	        existingPatient.setDni(updatedPatient.getDni());
 	        existingPatient.setPhone(updatedPatient.getPhone());
 	        existingPatient.setEmail(updatedPatient.getEmail());
-	        existingPatient.setMedicalRecord(updatedPatient.getMedicalRecord());
+	        existingPatient.setSex(updatedPatient.getSex());
+	        
+	        if (updatedPatient.getMedicalRecord() != null) {
+                updatedPatient.getMedicalRecord().setPatient(existingPatient);
+                existingPatient.setMedicalRecord(updatedPatient.getMedicalRecord());
+            }
 	        
 	        Patient savedPatient = patientRepository.save(existingPatient);
 	        
 	        return ResponseEntity.ok(savedPatient);
 	    } catch (Exception e) {
-	        // Usamos 500 (Internal Server Error) si algo falla en el guardado
+	       
 	        return ResponseEntity.status(500).build();
 	    }
 	}
