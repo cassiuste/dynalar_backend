@@ -2,6 +2,7 @@ package com.dynalar.dynalar.model.patient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,8 +25,13 @@ public class MedicalRecord {
     private String deceases;
 
     @OneToOne(mappedBy = "medicalRecord")
-    @JsonIgnore
+    @JsonIgnore 
     private Patient patient;
+    
+    
+    @Column(columnDefinition = "TEXT")
+    private String signatureBase64;
+    
     
     public MedicalRecord() {
     }
@@ -62,11 +68,11 @@ public class MedicalRecord {
 		this.familyHistory = familyHistory;
 	}
 
-	public String getInfectiousDecease() {
+	public String getInfectiousDeceases() {
 		return infectiousDeceases;
 	}
 
-	public void setInfectiousDecease(String infectiousDecease) {
+	public void setInfectiousDeceases(String infectiousDecease) {
 		this.infectiousDeceases = infectiousDecease;
 	}
 
@@ -85,6 +91,12 @@ public class MedicalRecord {
 	public void setPatient(Patient patient) {
 		this.patient = patient;
 	}
-    
+	public String getSignatureBase64() {
+	    return signatureBase64;
+	}
+
+	public void setSignatureBase64(String signatureBase64) {
+	    this.signatureBase64 = signatureBase64;
+	}
     
 }
