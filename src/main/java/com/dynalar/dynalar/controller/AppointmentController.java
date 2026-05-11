@@ -56,6 +56,8 @@ public class AppointmentController {
 			if (patient == null || treatment == null) {
 				return ResponseEntity.badRequest().body("Paciente o Tratamiento no encontrado.");
 			}
+			
+			boolean hasInfectiousDisease = !patient.getMedicalRecord().getInfectiousDecease().isEmpty();
 
 			LocalDateTime requestedStart = request.getRequestedTime();
 			int duration = treatment.getDurationMinutes();
@@ -74,8 +76,12 @@ public class AppointmentController {
 			boolean isMorning = (reqStartStr.compareTo(morningStart) >= 0 && reqEndStr.compareTo(morningEnd) <= 0);
 			boolean isAfternoon = (reqStartStr.compareTo(afternoonStart) >= 0 && reqEndStr.compareTo(afternoonEnd) <= 0);
 
+			if (hasInfectiousDisease && !isAfternoon) {
+			    return ResponseEntity.badRequest().body("Pacientes con enfermedades infecciosas solo pueden agendar en turno de tarde.");
+			}
+
 			if (!isMorning && !isAfternoon) {
-				return ResponseEntity.badRequest().body("La cita más el tiempo de limpieza se sale del horario laboral de la clínica.");
+			    return ResponseEntity.badRequest().body("La cita más el tiempo de limpieza se sale del horario laboral de la clínica.");
 			}
 
 			// 3. Buscar todos los dentistas que hacen este tratamiento
@@ -277,7 +283,11 @@ public class AppointmentController {
 				return ResponseEntity.badRequest().body("Tratamiento no encontrado.");
 			}
 
-			int totalDuration = treatment.getDurationMinutes() + 15; // Duración + Limpieza
+			com.dynalar.dynalar.model.patient.Patient patient = patientRepository.findById(request.getPatientId()).orElse(null);
+			boolean hasInfectiousDisease = patient != null && !patient.getMedicalRecord().getInfectiousDecease().isEmpty();
+
+			
+			int totalDuration = treatment.getDurationMinutes() + 15;
 			List<com.dynalar.dynalar.model.user.Dentist> qualifiedDentists = dentistRepository.findByTreatments_Id(treatment.getId());
 			// 1. Cargamos todos los boxes una sola vez fuera de los bucles de días/horas
 			List<Box> allBoxes = (List<Box>) boxRepository.findAll();
@@ -302,6 +312,11 @@ public class AppointmentController {
 					java.time.LocalTime.of(19, 0), java.time.LocalTime.of(19, 30)
 				};
 
+				if (hasInfectiousDisease) {
+					possibleTimes = new java.time.LocalTime[] { java.time.LocalTime.of(19, 30) };
+				}
+
+				
 				for (java.time.LocalTime slotTime : possibleTimes) {
 					java.time.LocalDateTime slotStart = LocalDateTime.of(currentDate, slotTime);
 					java.time.LocalDateTime slotEnd = slotStart.plusMinutes(totalDuration);
