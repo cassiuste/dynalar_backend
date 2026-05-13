@@ -29,8 +29,12 @@ public class MedicalRecord {
     private Patient patient;
     
     
-    @Column(columnDefinition = "TEXT")
+   
+    @Column(columnDefinition = "LONGTEXT")
     private String signatureBase64;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String signatureConfirmation;
     
     
     public MedicalRecord() {
@@ -72,8 +76,8 @@ public class MedicalRecord {
 		return infectiousDeceases;
 	}
 
-	public void setInfectiousDeceases(String infectiousDecease) {
-		this.infectiousDeceases = infectiousDecease;
+	public void setInfectiousDeceases(String infectiousDeceases) {
+		this.infectiousDeceases = infectiousDeceases;
 	}
 
 	public String getDeceases() {
@@ -97,6 +101,15 @@ public class MedicalRecord {
 
 	public void setSignatureBase64(String signatureBase64) {
 	    this.signatureBase64 = signatureBase64;
+	}
+
+
+	public String getSignatureConfirmation() {
+	    return signatureConfirmation;
+	}
+
+	public void setSignatureConfirmation(String signatureConfirmation) {
+	    this.signatureConfirmation = signatureConfirmation;
 	}
     
 }
