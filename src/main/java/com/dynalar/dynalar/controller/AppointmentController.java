@@ -32,39 +32,34 @@ public class AppointmentController {
 
 	@Autowired
 	private AppointmentRepository appointmentRepository;
-	
+
 	@Autowired
 	private PatientRepository patientRepository;
-	
+
 	@Autowired
 	private TreatmentRepository treatmentRepository;
-	
+
 	@Autowired
 	private DentistRepository dentistRepository;
-	
+
 	@Autowired
 	private BoxRepository boxRepository;
-
 
 	@PostMapping("/auto-assign")
 	public ResponseEntity<?> autoAssignAppointment(@RequestBody AutoAssignRequest request) {
 		try {
-			// 1. Obtener Paciente y Tratamiento
 			com.dynalar.dynalar.model.patient.Patient patient = patientRepository.findById(request.getPatientId()).orElse(null);
 			com.dynalar.dynalar.model.Treatment treatment = treatmentRepository.findById(request.getTreatmentId()).orElse(null);
 			
 			if (patient == null || treatment == null) {
 				return ResponseEntity.badRequest().body("Paciente o Tratamiento no encontrado.");
 			}
-			
-			boolean hasInfectiousDisease = !patient.getMedicalRecord().getInfectiousDecease().isEmpty();
 
 			LocalDateTime requestedStart = request.getRequestedTime();
 			int duration = treatment.getDurationMinutes();
 			LocalDateTime requestedEnd = requestedStart.plusMinutes(duration);
-			LocalDateTime requestedEndWithCleaning = requestedEnd.plusMinutes(15); // 15 mins extra de limpieza
+			LocalDateTime requestedEndWithCleaning = requestedEnd.plusMinutes(15);
 
-			// 2. Definir Horarios fijos de la Clínica
 			java.time.LocalTime morningStart = java.time.LocalTime.of(9, 0);
 			java.time.LocalTime morningEnd = java.time.LocalTime.of(14, 0);
 			java.time.LocalTime afternoonStart = java.time.LocalTime.of(15, 0);
@@ -76,23 +71,16 @@ public class AppointmentController {
 			boolean isMorning = (reqStartStr.compareTo(morningStart) >= 0 && reqEndStr.compareTo(morningEnd) <= 0);
 			boolean isAfternoon = (reqStartStr.compareTo(afternoonStart) >= 0 && reqEndStr.compareTo(afternoonEnd) <= 0);
 
-			if (hasInfectiousDisease && !isAfternoon) {
-			    return ResponseEntity.badRequest().body("Pacientes con enfermedades infecciosas solo pueden agendar en turno de tarde.");
-			}
-
 			if (!isMorning && !isAfternoon) {
-			    return ResponseEntity.badRequest().body("La cita más el tiempo de limpieza se sale del horario laboral de la clínica.");
+				return ResponseEntity.badRequest().body("La cita más el tiempo de limpieza se sale del horario laboral de la clínica.");
 			}
 
-			// 3. Buscar todos los dentistas que hacen este tratamiento
 			List<com.dynalar.dynalar.model.user.Dentist> qualifiedDentists = dentistRepository.findByTreatments_Id(treatment.getId());
 
-			// 4. Filtrar y encontrar el primero disponible
 			com.dynalar.dynalar.model.user.Dentist selectedDentist = null;
 			java.time.DayOfWeek dayOfWeek = requestedStart.getDayOfWeek();
 
 			for (com.dynalar.dynalar.model.user.Dentist dentist : qualifiedDentists) {
-				// Comprobar si trabaja ese día y ese turno (Usamos Boolean.TRUE.equals para evitar nulos)
 				boolean worksShift = false;
 				switch (dayOfWeek) {
 					case MONDAY: worksShift = isMorning ? Boolean.TRUE.equals(dentist.getMondayMorning()) : Boolean.TRUE.equals(dentist.getMondayAfternoon()); break;
@@ -104,7 +92,6 @@ public class AppointmentController {
 				}
 
 				if (worksShift) {
-					// Comprobar si tiene la agenda libre ese día a esa hora
 					LocalDateTime startOfDay = requestedStart.toLocalDate().atStartOfDay();
 					LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 					
@@ -112,10 +99,8 @@ public class AppointmentController {
 					
 					boolean hasOverlap = false;
 					for (Appointment app : existingAppointments) {
-						// El overlap tiene en cuenta los 15 mins extra de limpieza de la cita ya existente
 						LocalDateTime appEndWithCleaning = app.getEndTime().plusMinutes(15);
 						
-						// Lógica de solapamiento: (StartA < EndB) y (EndA > StartB)
 						if (requestedStart.isBefore(appEndWithCleaning) && requestedEndWithCleaning.isAfter(app.getStartTime())) {
 							hasOverlap = true;
 							break;
@@ -124,7 +109,7 @@ public class AppointmentController {
 
 					if (!hasOverlap) {
 						selectedDentist = dentist;
-						break; // ¡Encontramos al primer doctor disponible! Rompemos el bucle.
+						break;
 					}
 				}
 			}
@@ -159,7 +144,6 @@ public class AppointmentController {
 	            return ResponseEntity.status(HttpStatus.CONFLICT).body("No hay Boxes (sillones) disponibles para esta hora.");
 	        }
 			
-			// 5. Crear y guardar la cita con el doctor asignado automáticamente
 			Appointment newAppointment = new Appointment();
 			newAppointment.setPatient(patient);
 			newAppointment.setTreatment(treatment);
@@ -180,10 +164,6 @@ public class AppointmentController {
 		}
 	}
 
-
-	// ---------------------------------------------------------
-	// MÉTODOS CRUD ESTÁNDAR
-	// ---------------------------------------------------------
 
 	@GetMapping("/index")
 	public @ResponseBody ResponseEntity<List<Appointment>> getAllAppointments() {
@@ -258,7 +238,6 @@ public class AppointmentController {
 		}
 	}
 
-	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
 		try {
@@ -273,23 +252,31 @@ public class AppointmentController {
 			return ResponseEntity.status(404).build();
 		}
 	}
-	
-	
+
 	@PostMapping("/available-slots")
 	public ResponseEntity<?> getAvailableSlots(@RequestBody com.dynalar.dynalar.dto.SlotRequest request) {
 		try {
+			if (request.getTreatmentId() == null || request.getPatientId() == null) {
+				return ResponseEntity.badRequest().body("El ID del tratamiento y paciente son requeridos.");
+			}
+
 			com.dynalar.dynalar.model.Treatment treatment = treatmentRepository.findById(request.getTreatmentId()).orElse(null);
 			if (treatment == null) {
 				return ResponseEntity.badRequest().body("Tratamiento no encontrado.");
 			}
-
+			  
 			com.dynalar.dynalar.model.patient.Patient patient = patientRepository.findById(request.getPatientId()).orElse(null);
-			boolean hasInfectiousDisease = patient != null && !patient.getMedicalRecord().getInfectiousDecease().isEmpty();
+			if (patient == null) {
+				return ResponseEntity.badRequest().body("Paciente no encontrado.");
+			}
 
+			boolean hasInfectiousDisease = false;
+			if (patient.getMedicalRecord() != null && patient.getMedicalRecord().getInfectiousDeceases() != null) {
+				hasInfectiousDisease = !patient.getMedicalRecord().getInfectiousDeceases().trim().isEmpty();
+			}
 			
 			int totalDuration = treatment.getDurationMinutes() + 15;
 			List<com.dynalar.dynalar.model.user.Dentist> qualifiedDentists = dentistRepository.findByTreatments_Id(treatment.getId());
-			// 1. Cargamos todos los boxes una sola vez fuera de los bucles de días/horas
 			List<Box> allBoxes = (List<Box>) boxRepository.findAll();
 
 			java.util.Map<String, java.util.List<String>> availableSlotsPerDay = new java.util.TreeMap<>();
@@ -299,11 +286,20 @@ public class AppointmentController {
 				java.time.DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
 				java.util.List<String> dailySlots = new java.util.ArrayList<>();
 				
-				// 2. Definimos el inicio y fin del día una sola vez por día
 				LocalDateTime startOfDay = currentDate.atStartOfDay();
 				LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 
-				java.time.LocalTime[] possibleTimes = {
+				java.util.Map<Long, List<Appointment>> dentistAppsMap = new java.util.HashMap<>();
+				for (com.dynalar.dynalar.model.user.Dentist d : qualifiedDentists) {
+					dentistAppsMap.put(d.getId(), appointmentRepository.findByDentistIdAndStartTimeBetween(d.getId(), startOfDay, endOfDay));
+				}
+				java.util.Map<Integer, List<Appointment>> boxAppsMap = new java.util.HashMap<>();
+				for (Box b : allBoxes) {
+					boxAppsMap.put(b.getNumber(), appointmentRepository.findByBox_NumberAndStartTimeBetween(b.getNumber(), startOfDay, endOfDay));
+				}
+				List<Appointment> treatmentAppsToday = appointmentRepository.findByTreatment_IdAndStartTimeBetween(treatment.getId(), startOfDay, endOfDay);
+
+				java.time.LocalTime[] possibleTimesArray = {
 					java.time.LocalTime.of(9, 0), java.time.LocalTime.of(9, 30), java.time.LocalTime.of(10, 0), java.time.LocalTime.of(10, 30),
 					java.time.LocalTime.of(11, 0), java.time.LocalTime.of(11, 30), java.time.LocalTime.of(12, 0), java.time.LocalTime.of(12, 30),
 					java.time.LocalTime.of(13, 0), java.time.LocalTime.of(13, 30),
@@ -312,12 +308,13 @@ public class AppointmentController {
 					java.time.LocalTime.of(19, 0), java.time.LocalTime.of(19, 30)
 				};
 
+				java.util.List<java.time.LocalTime> timesToCheck = new java.util.ArrayList<>(java.util.Arrays.asList(possibleTimesArray));
+				
 				if (hasInfectiousDisease) {
-					possibleTimes = new java.time.LocalTime[] { java.time.LocalTime.of(19, 30) };
+					java.util.Collections.reverse(timesToCheck);
 				}
 
-				
-				for (java.time.LocalTime slotTime : possibleTimes) {
+				for (java.time.LocalTime slotTime : timesToCheck) {
 					java.time.LocalDateTime slotStart = LocalDateTime.of(currentDate, slotTime);
 					java.time.LocalDateTime slotEnd = slotStart.plusMinutes(totalDuration);
 					
@@ -340,7 +337,7 @@ public class AppointmentController {
 						}
 
 						if (worksShift) {
-							List<Appointment> existingApps = appointmentRepository.findByDentistIdAndStartTimeBetween(dentist.getId(), startOfDay, endOfDay);
+							List<Appointment> existingApps = dentistAppsMap.get(dentist.getId());
 							boolean hasOverlap = false;
 							for (Appointment app : existingApps) {
 								LocalDateTime appEndWithCleaning = app.getEndTime().plusMinutes(15);
@@ -359,32 +356,54 @@ public class AppointmentController {
 					if (isSlotAvailable) {
 					    boolean hasAvailableBox = false;
 					    for (Box box : allBoxes) {
-					        List<Appointment> boxApps = appointmentRepository.findByBox_NumberAndStartTimeBetween(box.getNumber(), startOfDay, endOfDay);
+					        List<Appointment> boxApps = boxAppsMap.get(box.getNumber());
 					        boolean boxOverlap = false;
+					        boolean hasAppsAfter = false;
+
 					        for (Appointment app : boxApps) {
 					            LocalDateTime appEndWithCleaning = app.getEndTime().plusMinutes(15);
 					            if (slotStart.isBefore(appEndWithCleaning) && slotEnd.isAfter(app.getStartTime())) {
 					                boxOverlap = true;
-					                break;
+					            }
+					            if (hasInfectiousDisease && app.getStartTime().isAfter(slotStart)) {
+					                hasAppsAfter = true;
 					            }
 					        }
-					        if (!boxOverlap) {
-					            hasAvailableBox = true;
-					            break;
+
+					        if (!boxOverlap && !hasAppsAfter) {
+					            boolean hasSameTreatmentAfter = false;
+					            if (hasInfectiousDisease) {
+					                for (Appointment tApp : treatmentAppsToday) {
+					                    if (tApp.getStartTime().isAfter(slotStart)) {
+					                        hasSameTreatmentAfter = true;
+					                        break;
+					                    }
+					                }
+					            }
+
+					            if (!hasSameTreatmentAfter) {
+					                hasAvailableBox = true;
+					                break;
+					            }
 					        }
 					    }
 					    
 					    if (hasAvailableBox) {
 					        dailySlots.add(String.format("%02d:%02d", slotTime.getHour(), slotTime.getMinute()));
+					        
+					        if (hasInfectiousDisease) {
+					            break;
+					        }
 					    }
 					}
 				}
 
 				if (!dailySlots.isEmpty()) {
+					java.util.Collections.sort(dailySlots);
 					availableSlotsPerDay.put(currentDate.toString(), dailySlots);
 				}
 				currentDate = currentDate.plusDays(1);
-			}
+			}			
 
 			return ResponseEntity.ok(availableSlotsPerDay);
 
