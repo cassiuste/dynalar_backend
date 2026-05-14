@@ -13,5 +13,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
 	List<Appointment> findByDentistIdAndStartTimeBetween(Long dentistId, LocalDateTime start, LocalDateTime end);
 	List<Appointment> findByBox_NumberAndStartTimeBetween(Integer boxNumber, LocalDateTime start, LocalDateTime end);
+	List<Appointment> findByTreatment_IdAndBox_NumberAndStartTimeBetween(Long treatmentId, Integer boxNumber, LocalDateTime start, LocalDateTime end);
+	List<Appointment> findByTreatment_IdAndStartTimeBetween(Long patientId, LocalDateTime start, LocalDateTime end);
 	boolean existsByBox_NumberAndStartTimeAfter(Integer boxNumber, LocalDateTime start);
 }
