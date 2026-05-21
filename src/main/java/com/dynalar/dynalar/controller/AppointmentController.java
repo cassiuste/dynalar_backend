@@ -16,8 +16,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.dynalar.dynalar.dto.AutoAssignRequest;
+import com.dynalar.dynalar.dto.DaySummary;
 import com.dynalar.dynalar.model.Appointment;
 import com.dynalar.dynalar.model.Box;
 import com.dynalar.dynalar.respository.AppointmentRepository;
@@ -166,15 +173,49 @@ public class AppointmentController {
 
 
 	@GetMapping("/index")
-	public @ResponseBody ResponseEntity<List<Appointment>> getAllAppointments() {
+	public @ResponseBody ResponseEntity<Page<Appointment>> getAllAppointments(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "50") int size,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start, 
+	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
 		try {
-			return ResponseEntity.ok(appointmentRepository.findAll());
+			Pageable pageable = PageRequest.of(page, size, Sort.by("startTime").ascending());
+			if (start != null && end != null) {
+				return ResponseEntity.ok(appointmentRepository.findByStartTimeBetween(start, end, pageable));
+			}
+			return ResponseEntity.ok(appointmentRepository.findAll(pageable));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.status(404).build();
 		}
 	}
+	
+	@GetMapping("/patient/{patientId}")
+	public @ResponseBody ResponseEntity<List<Appointment>> getAppointmentsByPatientId(@PathVariable Long patientId) {
+		try {
+			List<Appointment> appointments = appointmentRepository.findByPatientId(patientId);
+			return ResponseEntity.ok(appointments);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(404).build();
+		}
+	}
+	
+	@GetMapping("/calendar-summary")
+	public @ResponseBody ResponseEntity<List<DaySummary>> getCalendarSummary(
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
 
+		List<Object[]> results = appointmentRepository.findSummaryNative(start, end);
+		List<DaySummary> summary = results.stream().map(row -> new DaySummary(
+				           row[0].toString(),                               
+				           ((Number) row[1]).longValue() > 0,               
+				           ((Number) row[2]).intValue() > 0                
+				       )).toList();
+
+		return ResponseEntity.ok(summary);
+	}
+	
 	@PostMapping()
 	public ResponseEntity<Appointment> createAppointment(@RequestBody Appointment appointment) {
 		try {

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.dynalar.dynalar.model.Treatment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -27,6 +28,7 @@ public class Dentist extends User {
 
 	@ManyToMany
 	@JoinTable(name = "dentist_treatment", joinColumns = @JoinColumn(name = "dentist_id"), inverseJoinColumns = @JoinColumn(name = "treatment_id"))
+	@JsonIgnore
 	private Set<Treatment> treatments;
 
 	public Dentist() {
