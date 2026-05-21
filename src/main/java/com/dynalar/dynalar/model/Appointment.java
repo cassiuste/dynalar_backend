@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.dynalar.dynalar.model.odontogram.Odontogram;
 import com.dynalar.dynalar.model.patient.Patient;
 import com.dynalar.dynalar.model.user.Dentist;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,6 +41,7 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "odontogram_id")
+    @JsonIgnore
     private Odontogram odontogram;
 
     private String reason;

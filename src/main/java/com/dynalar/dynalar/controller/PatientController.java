@@ -1,8 +1,6 @@
 
 package com.dynalar.dynalar.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
@@ -11,12 +9,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.dynalar.dynalar.model.odontogram.Odontogram;
 import com.dynalar.dynalar.model.patient.Patient;
@@ -30,24 +32,30 @@ public class PatientController {
 	private PatientRepository patientRepository;
 	
 	@GetMapping("/index")
-	public @ResponseBody ResponseEntity<List<Patient>> getAllPatients() {
-		try {
-			return ResponseEntity.ok(patientRepository.findAll());
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(404).build();
-		}
+	public ResponseEntity<Page<Patient>> getAllPatients(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "50") int size,
+	        @RequestParam(required = false) String initial) {
+	    try {
+	        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending().and(Sort.by("lastName").ascending()).and(Sort.by("id").ascending()));
+	        
+	        if (initial != null && !initial.isEmpty()) {
+	            return ResponseEntity.ok(patientRepository.findByNameStartingWithIgnoreCase(initial, pageable));
+	        }
+	        
+	        return ResponseEntity.ok(patientRepository.findAll(pageable));
+	    } catch (Exception e) {
+	        return ResponseEntity.status(404).build();
+	    }
 	}
 	
 	@PostMapping
 	public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
 	    try {
-	
 	        if (patient.getMedicalRecord() != null) {
 	            patient.getMedicalRecord().setPatient(patient);
 	        }
 	        
-	     
 	        if (patient.getOdontogram() == null) {
 	            Odontogram o = new Odontogram();
 	            o.setPatient(patient);
@@ -65,6 +73,7 @@ public class PatientController {
 	    }
 	}
 
+	
 	@GetMapping("/{id}")
 	public ResponseEntity<Patient> getPatientById(@PathVariable Long id) {
 	    try {
@@ -78,7 +87,21 @@ public class PatientController {
 	    }
 	}
 	
-
+	@GetMapping("/search")
+	public ResponseEntity<Page<Patient>> searchPatients(
+	        @RequestParam String query,
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "50") int size) {
+	    try {
+	    	Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending().and(Sort.by("lastName").ascending()).and(Sort.by("id").ascending()));	        
+	        Page<Patient> patients = patientRepository.findByNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrDniContainingIgnoreCase(
+	                query, query, query, pageable);
+	        return ResponseEntity.ok(patients);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	    }
+	}
 	
 	@PutMapping("/update")
 	public ResponseEntity<Patient> updatePatient(@RequestBody Patient updatedPatient) {

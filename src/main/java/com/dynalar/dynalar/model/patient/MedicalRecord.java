@@ -28,8 +28,6 @@ public class MedicalRecord {
     @JsonIgnore 
     private Patient patient;
     
-    
-   
     @Column(columnDefinition = "LONGTEXT")
     private String signatureBase64;
 
