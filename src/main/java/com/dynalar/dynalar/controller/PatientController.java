@@ -94,8 +94,7 @@ public class PatientController {
 	        @RequestParam(defaultValue = "50") int size) {
 	    try {
 	    	Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending().and(Sort.by("lastName").ascending()).and(Sort.by("id").ascending()));	        
-	        Page<Patient> patients = patientRepository.findByNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrDniContainingIgnoreCase(
-	                query, query, query, pageable);
+	        Page<Patient> patients = patientRepository.searchPatientsAdvanced(query, pageable);
 	        return ResponseEntity.ok(patients);
 	    } catch (Exception e) {
 	        e.printStackTrace();
